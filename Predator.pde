@@ -4,10 +4,10 @@ public class Predator extends Animal
   private int amtEaten = 0;
   private boolean shouldReproduce = false, hasReproduced = false;
   
-  public Predator(float x, float y, float entityWidth, float entityHeight, color entityColor, float opacity, String name, String type, float weight, String path){
+  public Predator(float x, float y, float entityWidth, float entityHeight, color entityColor, float opacity, String name, String type, float weight, String path, float speed){
     super(x, y, entityWidth, entityHeight, entityColor, opacity, name, type, weight, path);
     this.type = "Predator";
-    this.speed = 7.5;
+    this.speed = speed;
   }
   
   public void reproduced(boolean b){
@@ -26,6 +26,10 @@ public class Predator extends Animal
   
   public boolean shouldReproduce(){
     return shouldReproduce;
+  }
+  
+  public float getSpeed(){
+   return speed; 
   }
   
   public void move()
@@ -64,6 +68,11 @@ public class Predator extends Animal
         }
       }
     }
-    
+  }
+  
+  public void display(){
+   super.display();
+   textSize(30);
+   text(speed, getX(), getY()+10);
   }
 }

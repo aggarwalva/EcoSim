@@ -5,14 +5,16 @@ Predator tempPredator;
 Prey tempPrey;
 String path;
 public int initPredatorPopulation = 2;
-public int initPreyPopulation = 15;
+public int initPreyPopulation = 20;
 public long time;
 public int predatorStarve = 0, predatorBorn = 0;
 public int totalNum = 0, preyNum = 0, predNum = 0;
+public double predatorSpeed;
 
 public void setup()
 {
-  size(960, 540);
+  fullScreen();
+  //size(960, 540);
   //Create a basic entity at a random location on the canvas
   
   predators = new ArrayList<Predator>();
@@ -20,7 +22,7 @@ public void setup()
   ecosystem = new ArrayList<Animal>();
   
   for(int i = 0; i < initPredatorPopulation; i++){
-    createPredator();
+    createPredator(random(5,15));
   }
   
   for(int i = 0; i < initPreyPopulation; i++){
@@ -67,6 +69,8 @@ public void draw()
      }
   }
   
+  predatorSpeed = 0;
+  
   for(int i = 0; i < ecosystem.size(); i++){
     if(!ecosystem.get(i).isAlive()){
        if(ecosystem.get(i).getType() == "Prey"){
@@ -78,32 +82,36 @@ public void draw()
        }
     } else {
        if(ecosystem.get(i).getType() == "Predator"){
-          if(ecosystem.get(i).shouldReproduce()){
+         predatorSpeed += ecosystem.get(i).getSpeed();
+         if(ecosystem.get(i).shouldReproduce()){
               ecosystem.get(i).reproduce();
-              createPredator();
+              createPredator(random(ecosystem.get(i).getSpeed() - 3, ecosystem.get(i).getSpeed() + 3));;
               predatorBorn++;
           }
        }
-      
        ecosystem.get(i).move();
        ecosystem.get(i).display();
     }
   }
   
   if(ecosystem.size() == 0 || predators.size() == 0){
-    try{
+    /*try{
       wait(1000); 
     } catch(Exception e){
        
-    }
+    }*/
     System.out.println("The ecological simulator has concluded. This ecosystem lasted " + millis()/1000 + " seconds and supported " + totalNum + " animals throughout its history, including " + predNum + " predators and " + preyNum + " prey");
     exit();
-}
+  }
+  text(frameRate, 100, 50);
+  text(millis()/1000.0, 1180, 50);
+  text(prey.size(), 1180, 100);
+  text(predators.size() + "  " + (int)predatorSpeed/predators.size(), 100, 100);
 }
 
-public void createPredator(){
+public void createPredator(float speed){
   path = "SEBA.png";
-  tempPredator = new Predator(random(width), random(height), 50, 50, #FF4646, 255, "Begone", "REEEEEE", 15, path);
+  tempPredator = new Predator(random(width), random(height), 50, 50, #FF4646, 255, "Begone", "REEEEEE", 15, path, speed);
   tempPredator.resize(0.135,0.135);
   predators.add(tempPredator);
   ecosystem.add(tempPredator);

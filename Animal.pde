@@ -46,6 +46,10 @@ public class Animal extends Entity
     this.weight=weight;
   }
   
+  public float getSpeed(){
+    return 0;
+  }
+  
   public void addCollidables(ArrayList<Animal> a){
       this.collidableObjects = a;
   }
