@@ -5,11 +5,11 @@ Predator tempPredator;
 Prey tempPrey;
 String path;
 public int initPredatorPopulation = 2;
-public int initPreyPopulation = 20;
+public int initPreyPopulation = 15;
 public long time;
-public int predatorStarve = 0, predatorBorn = 0;
+public int predatorStarve = 0, predatorBorn = 0, preyBorn = 0;
 public int totalNum = 0, preyNum = 0, predNum = 0;
-public double predatorSpeed;
+public double predatorSpeed, preyReproduce;
 
 public void setup()
 {
@@ -22,11 +22,11 @@ public void setup()
   ecosystem = new ArrayList<Animal>();
   
   for(int i = 0; i < initPredatorPopulation; i++){
-    createPredator(random(5,15));
+    createPredator(random(9,11), random(90,110)); //90,110
   }
   
   for(int i = 0; i < initPreyPopulation; i++){
-    createPrey();
+    createPrey(random(3000,5000));
   }
   
   for(int i = 0; i < ecosystem.size(); i++){
@@ -44,32 +44,30 @@ public void draw()
     ecosystem.get(i).addCollidables(ecosystem);
   }
   
-  if(millis() - time > 5000){
-    int preyBirths = ceil(prey.size()/3);
-    for(int i = 0; i < preyBirths; i++){
-       createPrey(); 
-    }
+  if(millis() - time > 3000){
     time = millis();
     predatorStarve++;
     
-    System.out.println(preyBirths + " prey born");
+    System.out.println(preyBorn + " prey born");
     System.out.println(predatorBorn + " predators born");
     predatorBorn = 0;
+    preyBorn = 0;
   }
   
   if(predatorStarve > 1){
      predatorStarve = 0;
      
-     for(Predator p : predators){
+     /*for(Predator p : predators){
         if(p.hasReproduced()){
            p.reproduced(false); 
         } else{
            p.kill();
         }
-     }
+     }*/
   }
   
   predatorSpeed = 0;
+  preyReproduce = 0;
   
   for(int i = 0; i < ecosystem.size(); i++){
     if(!ecosystem.get(i).isAlive()){
@@ -85,12 +83,25 @@ public void draw()
          predatorSpeed += ecosystem.get(i).getSpeed();
          if(ecosystem.get(i).shouldReproduce()){
               ecosystem.get(i).reproduce();
-              createPredator(random(ecosystem.get(i).getSpeed() - 3, ecosystem.get(i).getSpeed() + 3));;
+              createPredator(random(ecosystem.get(i).getSpeed() - 2, ecosystem.get(i).getSpeed() + 2), random(ecosystem.get(i).getSight() - 30, ecosystem.get(i).getSight() + 30));;
               predatorBorn++;
           }
+       } else{
+          if(ecosystem.get(i).getType() == "Prey"){
+            preyReproduce += ecosystem.get(i).getReproduceTime();  
+            if(ecosystem.get(i).shouldReproduce()){
+              ecosystem.get(i).reproduce();
+              createPrey(ecosystem.get(i).getReproduceTime() + random(-200, 200));
+              preyBorn++;
+          }
+          }
        }
-       ecosystem.get(i).move();
+      if(ecosystem.get(i).getStarve() > 6000){
+        ecosystem.get(i).kill();
+      } else{
+        ecosystem.get(i).move();
        ecosystem.get(i).display();
+      }
     }
   }
   
@@ -105,13 +116,17 @@ public void draw()
   }
   text(frameRate, 100, 50);
   text(millis()/1000.0, 1180, 50);
-  text(prey.size(), 1180, 100);
-  text(predators.size() + "  " + (int)predatorSpeed/predators.size(), 100, 100);
+  if(predators.size() != 0){
+   text(predators.size() + "  " + (int)predatorSpeed/predators.size(), 100, 100); 
+  }
+  if(prey.size() != 0){
+   text(prey.size() + "  " + (int)preyReproduce/prey.size(), 1180, 100); 
+  }
 }
 
-public void createPredator(float speed){
+public void createPredator(float speed, float sight){
   path = "SEBA.png";
-  tempPredator = new Predator(random(width), random(height), 50, 50, #FF4646, 255, "Begone", "REEEEEE", 15, path, speed);
+  tempPredator = new Predator(random(width), random(height), 50, 50, #FF4646, 255, "Begone", "REEEEEE", 15, path, speed, sight);
   tempPredator.resize(0.135,0.135);
   predators.add(tempPredator);
   ecosystem.add(tempPredator);
@@ -120,11 +135,11 @@ public void createPredator(float speed){
   totalNum++;
 }
 
-public void createPrey(){
+public void createPrey(float reproduce){
   if(prey.size() % 2 == 0) path = "FU.png";
   else path = "CYRUS.png";
   
-  tempPrey = new Prey(random(width), random(height), 50, 50, #FF4646, 255, "Begone", "REEEEEE", 15, path);
+  tempPrey = new Prey(random(width), random(height), 50, 50, #FF4646, 255, "Begone", "REEEEEE", 15, path, reproduce);
   tempPrey.resize(0.25,0.25);
   prey.add(tempPrey);
   ecosystem.add(tempPrey);

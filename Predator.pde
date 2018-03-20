@@ -1,13 +1,18 @@
 public class Predator extends Animal
 {
-  private float xMotion, yMotion, speed;
+  private float xMotion, yMotion, speed, sight;
   private int amtEaten = 0;
   private boolean shouldReproduce = false, hasReproduced = false;
+  private long reproduceCooldown, gestationTimer, starveTimer;
   
-  public Predator(float x, float y, float entityWidth, float entityHeight, color entityColor, float opacity, String name, String type, float weight, String path, float speed){
+  public Predator(float x, float y, float entityWidth, float entityHeight, color entityColor, float opacity, String name, String type, float weight, String path, float speed, float sight){
     super(x, y, entityWidth, entityHeight, entityColor, opacity, name, type, weight, path);
     this.type = "Predator";
     this.speed = speed;
+    this.sight = sight;
+    reproduceCooldown = millis();
+    gestationTimer = millis();
+    starveTimer = millis();
   }
   
   public void reproduced(boolean b){
@@ -22,14 +27,24 @@ public class Predator extends Animal
     shouldReproduce = false;
     amtEaten = 0;
     reproduced(true);
+    reproduceCooldown = millis();
+    starveTimer = millis();
   }
   
   public boolean shouldReproduce(){
-    return shouldReproduce;
+    return (shouldReproduce && (millis() - reproduceCooldown > 2000));
   }
   
   public float getSpeed(){
    return speed; 
+  }
+  
+  public float getSight(){
+   return sight; 
+  }
+  
+  public long getStarve(){
+   return millis() - starveTimer;
   }
   
   public void move()
@@ -57,7 +72,9 @@ public class Predator extends Animal
       if(dist(a.getX(), a.getY(), this.getX(), this.getY()) < a.getDiagonal() + this.getDiagonal() && !a.equals(this)){
         if(a.getType() == "Prey"){
           a.kill(); 
-          amtEaten ++;
+          if(millis() - gestationTimer > 2000){
+           amtEaten++; 
+          }
           
           if(amtEaten > 1){
             shouldReproduce = true; 
@@ -66,6 +83,14 @@ public class Predator extends Animal
           this.setX(this.getX() - (xMotion * 2));
           this.setY(this.getY() - (yMotion * 2));  
         }
+      } else if(hasLOS(a.getX(), a.getY(), sight)){
+         if(a.getType() == "Prey"){
+             xMotion = abs(xMotion) * Utils.getSign(a.getX() - this.getX()) * speed * 0.1;
+             yMotion = abs(yMotion) * Utils.getSign(a.getY() - this.getY()) * speed * 0.1;
+             
+             this.setX(this.getX() + xMotion);
+             this.setY(this.getY() + yMotion);
+         }
       }
     }
   }

@@ -50,6 +50,22 @@ public class Animal extends Entity
     return 0;
   }
   
+  public float getSight(){
+     return 0; 
+  }
+  
+  public float getReproduceTime(){
+     return 0; 
+  }
+  
+  public long getReproduceCooldown(){
+   return 0; 
+  }
+  
+  public long getStarve(){
+   return 0; 
+  }
+  
   public void addCollidables(ArrayList<Animal> a){
       this.collidableObjects = a;
   }
